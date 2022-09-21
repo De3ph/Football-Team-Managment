@@ -1,0 +1,117 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum FOOT {
+  LEFT
+  RIGHT
+}
+
+enum CONTINENT {
+  NORTH_AMERICA
+  SOUTH_AMERICA
+  EUROPE
+  AFRICA
+  ASIA
+  AUSTRALIA
+  // no team from Antartica, so don't need to be here :)
+}
+
+model Country {
+  name      String    @id @db.VarChar(128)
+  continent CONTINENT
+  teams     Team[]
+  players   Player[]
+  coaches   Coach[]
+}
+
+model Team {
+  id      Int      @id @default(autoincrement())
+  name    String   @unique @db.VarChar(128)
+  players Player[]
+  country String
+  coachId Int      @unique
+  Coach   Coach    @relation(fields: [coachId], references: [id])
+  Country Country  @relation(fields: [country], references: [name])
+  User    User?
+}
+
+model Coach {
+  id      Int     @id @default(autoincrement())
+  name    String
+  surname String
+  country String
+  teamId  Int?
+  Country Country @relation(fields: [country], references: [name])
+  Team Team?
+}
+
+model Player {
+  id           Int     @id @default(autoincrement())
+  name         String  @db.VarChar(128)
+  surname      String  @db.VarChar(128)
+  age          Int     @default(18)
+  teamId       Int
+  dominantFoot FOOT    @default(RIGHT)
+  height       Int
+  weight       Int
+  country      String
+  Team         Team    @relation(fields: [teamId], references: [id])
+  Country      Country @relation(fields: [country], references: [name])
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  role          String?   @default("Member")
+  teamId        Int?      @unique
+  Team          Team?     @relation(fields: [teamId], references: [id])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}

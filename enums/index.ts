@@ -1,0 +1,13 @@
+export enum FOOT {
+  LEFT = "left",
+  RIGHT = "right"
+}
+
+export enum CONTINENT {
+  NORTH_AMERICA = "NORTH_AMERICA",
+  SOUTH_AMERICA = "SOUTH_AMERICA",
+  EUROPE = "EUROPE",
+  AFRICA = "AFRICA",
+  ASIA = "ASIA",
+  AUSTRALIA = "AUSTRALIA"
+}
