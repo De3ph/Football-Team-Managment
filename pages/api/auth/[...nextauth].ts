@@ -17,6 +17,10 @@ export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   session: {
     strategy: "database"
+  },
+  pages: {
+    signIn: "../../index.tsx"
+    // newUser: "../../[name]/welcome"
   }
 }
 

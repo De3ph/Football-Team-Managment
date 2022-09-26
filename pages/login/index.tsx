@@ -1,19 +1,24 @@
-import type { NextPage } from "next"
-import { useSession, signIn } from "next-auth/react"
-import { useRouter } from "next/router"
+import { GetServerSidePropsContext } from "next"
+import { OAuthProviderType } from "next-auth/providers"
+import { getProviders, signIn } from "next-auth/react"
 
-const Home: NextPage = () => {
-    const { data: session } = useSession()
-    const router = useRouter()
-    if (session) {
-        router.push(`/${session.user?.name}/dashboard`)
-    }
+interface Props {
+    provider: OAuthProviderType
+}
+
+export default function SignIn({ provider }: Props) {
+    signIn(provider.id)
     return (
         <>
-            Not signed in <br />
-            <button onClick={() => signIn()}>Sign in</button>
         </>
     )
 }
 
-export default Home
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+    const providers = await getProviders()
+    return {
+        props: {
+            provider: providers?.google
+        }
+    }
+}

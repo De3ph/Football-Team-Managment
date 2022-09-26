@@ -1,44 +1,45 @@
+import { Button, Heading, HStack, VStack } from "@chakra-ui/react"
 import { Session } from "next-auth"
-import { unstable_getServerSession } from "next-auth/next"
-import { signOut } from "next-auth/react"
-import { authOptions } from "pages/api/auth/[...nextauth]"
+import { OAuthProviderType } from "next-auth/providers"
+import { getProviders, signOut, useSession } from "next-auth/react"
 
 import React from "react"
 
 type Props = {
-  session: Session
+  session: Session,
+  provider: OAuthProviderType
 }
 
-const Dashboard = ({ session }: Props) => {
+const Dashboard = ({ provider }: Props) => {
+
+  const { data: session } = useSession()
+
+  const redirectLogout = () => {
+    signOut({
+      callbackUrl: '/'
+    })
+  }
+
   return (
     <>
-      {/* eslint-disable-next-line react/no-unescaped-entities */}
-      <div>{session.user?.name}'s Dashboard</div>
-      <button onClick={() => signOut()}>Sign Out</button>
+      <VStack w='100vw' p='4' spacing='3'>
+        <HStack w='100%' justify='space-between' p='2'>
+          {/* eslint-disable-next-line react/no-unescaped-entities */}
+          <Heading size='md'>{session?.user?.name}'s Dashboard</Heading>
+          <Button onClick={redirectLogout}>Sign Out</Button>
+        </HStack>
+
+      </VStack>
     </>
   )
 }
 
 export async function getServerSideProps(context: any) {
-  const session = await unstable_getServerSession(
-    context.req,
-    context.res,
-    authOptions
-  )
-
-  // if user not logged in , redirect to login screen
-  if (!session) {
-    return {
-      redirect: {
-        destination: "/ogin",
-        permanent: false
-      }
-    }
-  }
+  const providers = await getProviders()
 
   return {
     props: {
-      session
+      provider: providers?.google
     }
   }
 }
